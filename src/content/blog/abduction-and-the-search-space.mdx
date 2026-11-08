@@ -1,0 +1,74 @@
+---
+title: 'Abductive reasoning and propositional search-space growth'
+description: 'An analysis of representation changes, candidate premise generation, and search limitations in the ExplainEthics adaptation of ARGOS.'
+date: 2026-11-08
+draft: true
+tags:
+  - reasoning
+  - neuro-symbolic-ai
+---
+
+import Pipeline from '../../components/Pipeline.astro';
+
+Neuro-symbolic reasoning separates the generation of candidate premises from formal inference over those premises. This separation allows the assumptions and logical dependencies of a conclusion to be examined explicitly.
+
+My undergraduate thesis, _On the Challenges of Neurosymbolic Abductive Inference for Moral Reasoning_, investigated this approach by adapting ARGOS to moral reasoning on ExplainEthics. This article examines how the representation changes affected the search problem.
+
+## Abductive inference
+
+Deduction asks what follows from a knowledge base. Abduction asks which additional premises could help establish a target conclusion.
+
+Let $\mathcal{K}_t$ be the knowledge base at iteration $t$, and let $\Delta_t$ be a set of candidate premises. The next iteration accumulates those premises:
+
+$$
+\mathcal{K}_{t+1} = \mathcal{K}_t \cup \Delta_t.
+$$
+
+The intended relationship to a target query $q$ is then $\mathcal{K}_{t+1} \models q$: every model of the accumulated knowledge should satisfy the query. In a propositional setting, checking this relationship can be expressed as testing whether $\mathcal{K}_{t+1} \land \neg q$ is unsatisfiable.[^consistency]
+
+ARGOS uses a language model to generate commonsense premises and a symbolic solver to check the inference. The two components play different roles: the model proposes content; the solver checks a formal relationship over its representation.
+
+<Pipeline />
+
+## Adapting the representation
+
+The ExplainEthics adaptation made two related changes.
+
+| Part of the system     | Adaptation                                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Logical representation | First-order logic becomes propositional logic, because the dataset has no explicit quantification.             |
+| Premise generation     | Candidate clauses consider combinations of literals, because entities are unavailable to constrain the search. |
+
+At first glance, removing quantifiers might seem like simplification. It simplifies one aspect of the representation, but it also removes structure that can guide candidate generation. The cost moves into the space of possible clauses.
+
+As a simple illustration—not a count of the thesis implementation—choosing $k$ items from $n$ candidates already gives
+
+$$
+\binom{n}{k} = \frac{n!}{k!(n-k)!}
+$$
+
+possible combinations. Allowing different lengths and polarities expands the possibilities further. The practical question becomes how to select candidates that are both relevant and useful for reaching the query.
+
+## Experimental results
+
+The reported experiment evaluated **138 queries**. ARGOS achieved **93.5% accuracy**, compared with **75.9%** for the Chain-of-Thought baseline.
+
+Those figures describe the tested configuration and evaluation set. They do not settle how the approach behaves across other datasets, prompts, language models, or search budgets. The failure analysis helps identify what to examine next.
+
+## Observed limitations
+
+**Search-space growth.** Without entity-based restrictions, propositional candidate generation becomes combinatorial. A procedure can be formally well defined while still being expensive to search.
+
+**Premises that do not converge.** A plausible commonsense clause is not necessarily one that helps establish the target query. Generating more premises does not, by itself, provide a useful search direction.
+
+**Variability in generation.** Language-model-generated commonsense clauses can vary across runs or contradict one another. Symbolic verification makes the consequences of clauses explicit, but it does not guarantee that the clauses themselves are sound descriptions of the world.
+
+## Scope of formal verification
+
+A solver establishes a relationship between formal premises and a conclusion. The choice, relevance, and consistency of those premises remain part of the larger system’s responsibility.
+
+Evaluation therefore needs to examine the generated knowledge and the search process alongside final-query accuracy. Explicit dependencies between premises and conclusions can help identify the source of a reasoning failure.
+
+The [research overview](../../research/#thesis) provides a compact account of the thesis and its results. This note summarizes the thesis methodology and experiment described there; it does not represent a separate publication.
+
+[^consistency]: An inconsistent knowledge base entails every proposition in classical logic. A useful inference workflow therefore also needs to pay attention to consistency; entailment alone is not evidence that the premises are reliable.

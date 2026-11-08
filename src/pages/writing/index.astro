@@ -1,0 +1,103 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import Icon from '../../components/Icon.astro';
+import { getPosts } from '../../lib/posts';
+import { url } from '../../lib/urls';
+const posts = await getPosts();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+---
+
+<Base
+  title="Writing"
+  description="Technical notes on retrieval, deep learning, computer vision, knowledge representation, reasoning, and the engineering around AI systems."
+>
+  <header class="page-heading">
+    <h1>Writing</h1>
+    <p class="lead">
+      Technical articles on AI research and engineering, including retrieval, computer vision,
+      representation learning, and reasoning.
+    </p>
+    <a class="text-link primary" href={url('rss.xml')}>
+      RSS feed <Icon name="rss" size={15} />
+    </a>
+  </header>
+  {posts.length > 0 ? (
+    <>
+      <div class="filters" id="writing-filters" hidden>
+        <label class="search-field">
+          <span class="sr-only">Search articles</span>
+          <Icon name="search" size={16} />
+          <input id="post-search" type="search" placeholder="Search articles" autocomplete="off" />
+        </label>
+        <div class="filter-tags" role="group" aria-label="Filter by topic">
+          <button type="button" data-tag="" aria-pressed="true">
+            All articles
+          </button>
+          {tags.map((tag) => (
+            <button type="button" data-tag={tag} aria-pressed="false">
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p class="filter-status mono" role="status" aria-live="polite" id="filter-status">
+        {posts.length} articles
+      </p>
+      <PostList posts={posts} />
+      <p id="no-results" class="empty-state" hidden>
+        No articles match the selected search criteria.
+      </p>
+    </>
+  ) : (
+    <p class="empty-state" data-writing-empty>
+      No articles have been published yet.
+    </p>
+  )}
+  <script>
+    const filters = document.getElementById('writing-filters');
+    const search = document.querySelector<HTMLInputElement>('#post-search');
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-post]')];
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-tag]')];
+    let topic = '';
+    const filter = () => {
+      const query = search?.value.toLowerCase().trim() || '';
+      let count = 0;
+      rows.forEach((row) => {
+        const tags: string[] = JSON.parse(row.dataset.tags || '[]');
+        const visible =
+          (!topic || tags.includes(topic)) &&
+          `${row.dataset.title} ${tags.join(' ')}`.toLowerCase().includes(query);
+        row.hidden = !visible;
+        if (visible) count++;
+      });
+      const status = document.getElementById('filter-status');
+      if (status)
+        status.textContent = `${count} ${count === 1 ? 'article' : 'articles'}${query || topic ? ' found' : ''}`;
+      const empty = document.getElementById('no-results');
+      if (empty) empty.hidden = count > 0;
+    };
+    filters?.removeAttribute('hidden');
+    search?.addEventListener('input', filter);
+    buttons.forEach((button) =>
+      button.addEventListener('click', () => {
+        topic = button.dataset.tag || '';
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+        filter();
+      }),
+    );
+  </script>
+</Base>
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

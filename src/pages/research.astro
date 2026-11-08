@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+import Pipeline from '../components/Pipeline.astro';
+import Icon from '../components/Icon.astro';
+import { thesis, hypernetworks } from '../data/research';
+import { url } from '../lib/urls';
+import { getPosts } from '../lib/posts';
+const thesisArticle = (await getPosts()).find(
+  (post) => post.id === 'abduction-and-the-search-space',
+);
+---
+
+<Base
+  title="Research"
+  description="Research on neuro-symbolic abductive inference for moral reasoning and input encodings for hypernetworks by Fikri Budianto."
+>
+  <header class="page-heading">
+    <h1>Research</h1>
+    <p class="lead">
+      My research interests include deep learning, natural language processing, knowledge
+      representation and reasoning, and neuro-symbolic AI. The following work examines neural
+      reasoning systems and input encodings for hypernetworks.
+    </p>
+  </header>
+  <article class="research-block" id="thesis">
+    <p class="project-category">
+      {thesis.type} · {thesis.institution}
+    </p>
+    <h2>{thesis.title}</h2>
+    <p class="lead">{thesis.description}</p>
+    <div class="research-body">
+      <section>
+        <h3>The problem</h3>
+        <p>
+          Language models can produce plausible reasoning without a formally verifiable inference
+          process. A neuro-symbolic approach makes the premises and inference steps explicit,
+          opening them to inspection.
+        </p>
+      </section>
+      <section>
+        <h3>The approach</h3>
+        <p>
+          ARGOS iteratively asks an LLM for commonsense premises, translates them into logical
+          clauses, and uses a SAT solver to check whether the accumulated knowledge establishes a
+          target query.
+        </p>
+      </section>
+    </div>
+    <Pipeline />
+    <div class="research-body">
+      <section>
+        <h3>My work</h3>
+        <p>
+          I adapted ARGOS to moral reasoning on ExplainEthics. Because the dataset has no explicit
+          quantification, I changed the logical representation from first-order to propositional
+          logic. Without entities to constrain candidate generation, commonsense clause generation
+          instead considers combinations of literals.
+        </p>
+      </section>
+      <section>
+        <h3>Limitations</h3>
+        <ul>
+          <li>Propositionalisation expands the abductive search space combinatorially.</li>
+          <li>Generated premises can fail to move inference toward the target query.</li>
+          <li>Stochastic commonsense generation can produce inconsistent clauses.</li>
+        </ul>
+      </section>
+    </div>
+    <h3 class="results-heading">Reported results</h3>
+    <table class="results-table">
+      <caption>Accuracy on{thesis.queries}evaluated ExplainEthics queries</caption>
+      <thead>
+        <tr>
+          <th scope="col">Method</th>
+          <th scope="col">Accuracy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">ARGOS</th>
+          <td>{thesis.argosAccuracy}</td>
+        </tr>
+        <tr>
+          <th scope="row">Chain-of-Thought baseline</th>
+          <td>{thesis.baselineAccuracy}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="source-note">
+      Results from the reported thesis experiment on ExplainEthics. This evaluation describes the
+      tested configuration and query set; broader generalization remains a separate question.
+    </p>
+    {thesisArticle && (
+      <p style="margin-top:24px">
+        <a class="text-link primary" href={url('writing/abduction-and-the-search-space/')}>
+          Article: abductive reasoning and search-space growth <Icon name="arrow" />
+        </a>
+      </p>
+    )}
+  </article>
+  <article class="research-block" id="hypernetworks">
+    <p class="project-category">{hypernetworks.type} · IR–NLP Laboratory, UI</p>
+    <h2>{hypernetworks.title}</h2>
+    <p class="lead">{hypernetworks.description}</p>
+    <div class="research-body">
+      <section>
+        <h3>Research question</h3>
+        <p>
+          How does the choice of input encoding affect the learning of continuous neural-network
+          weight manifolds? The study compares positional encoding, Gaussian random Fourier
+          features, and multiresolution hash encoding.
+        </p>
+      </section>
+      <section>
+        <h3>The findings</h3>
+        <p>
+          In the manuscript’s experiments, Gaussian random Fourier features yielded the strongest
+          validation accuracy, while hash encoding achieved lower loss metrics. The comparison
+          highlights a tradeoff between reconstruction fidelity and downstream accuracy, alongside
+          implementation overhead in PyTorch.
+        </p>
+      </section>
+      <section>
+        <h3>My contribution</h3>
+        <p>
+          As an AI research intern, I reviewed the relevant literature, implemented encoding
+          comparisons, ran controlled experiments, and communicated the findings through reports,
+          presentations, and the research manuscript.
+        </p>
+      </section>
+      <section>
+        <h3>Scope</h3>
+        <p>
+          This is a research manuscript. Experiments were bounded by computational resources, and
+          the manuscript identifies evaluation on new networks as future work.
+        </p>
+      </section>
+    </div>
+  </article>
+</Base>

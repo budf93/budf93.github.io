@@ -1,0 +1,15 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/fikri-budianto.jpeg';
+import { site } from '../data/site';
+---
+
+<Image
+  src={portrait}
+  alt={`Portrait of ${site.name}`}
+  width={720}
+  format="webp"
+  quality={85}
+  loading="eager"
+  class="profile-photo"
+/>

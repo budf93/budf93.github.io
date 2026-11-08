@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { projects } from '../../data/projects';
+import { site } from '../../data/site';
+import { url } from '../../lib/urls';
+---
+
+<Base
+  title="Projects"
+  description="Independent projects in information retrieval, natural language processing, document question answering, and neural recommendation."
+>
+  <header class="page-heading">
+    <h1>Projects</h1>
+    <p class="lead">
+      Selected independent work in information retrieval, natural language processing, and deep
+      learning. Each entry describes the problem, implementation, and evaluation.
+    </p>
+  </header>
+  <div class="project-index">
+    {projects.map((project) => (
+      <article class="project-index-entry">
+        <div>
+          <span class="project-category">
+            {project.category} · {project.context}
+          </span>
+          <h2>
+            <a href={url(`projects/${project.id}/`)}>
+              {project.title}
+              <Icon name="arrow" />
+            </a>
+          </h2>
+          <p>{project.description}</p>
+          <div class="tag-list">
+            {project.tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+        {project.github ? (
+          <a class="text-link repo" href={project.github}>
+            View repository <Icon name="external" size={15} />
+          </a>
+        ) : null}
+      </article>
+    ))}
+  </div>
+  <section class="section">
+    <aside class="sidebar">
+      <h2>Public repositories</h2>
+      <p>
+        Public repositories are linked where available. Additional information is available on my
+        GitHub profile.
+      </p>
+      <a class="text-link primary" style="margin-top:18px" href={site.github}>
+        GitHub profile <Icon name="external" size={15} />
+      </a>
+    </aside>
+  </section>
+</Base>

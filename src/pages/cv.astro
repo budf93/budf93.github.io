@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { thesis, hypernetworks } from '../data/research';
+import { projects } from '../data/projects';
+import { url } from '../lib/urls';
+---
+
+<Base
+  title="Curriculum vitae"
+  description="Education, engineering and research experience, selected projects, and technical foundations of Fikri Budianto."
+>
+  <header class="page-heading">
+    <p class="eyebrow">Curriculum vitae</p>
+    <h1>{site.name}</h1>
+    <p class="lead">
+      AI engineer with experience in computer vision, retrieval, and model-serving systems. Research
+      interests in representation learning, knowledge representation, and neuro-symbolic reasoning.
+    </p>
+    <div class="cv-tools">
+      <button type="button" class="button" id="print-cv">
+        Print / Save as PDF <Icon name="external" size={14} />
+      </button>
+      {site.cvPdf && (
+        <a class="button" href={site.cvPdf}>
+          Download CV <Icon name="arrow" size={14} />
+        </a>
+      )}
+    </div>
+    <noscript>
+      <p class="source-note" style="margin-top:16px">
+        Use your browser’s Print command to save this page as a PDF.
+      </p>
+    </noscript>
+  </header>
+  <div class="project-detail">
+    <section class="cv-section">
+      <h2>Education</h2>
+      <h3>{site.education.degree}</h3>
+      <p style="margin-top:10px">
+        {site.education.faculty}, {site.education.institution}
+        <br />
+        <span class="mono">
+          {site.education.period} · GPA {site.education.gpa}
+        </span>
+      </p>
+      <p style="margin-top:15px">
+        Thesis: <a href={url('research/#thesis')}>{thesis.title}</a>
+      </p>
+    </section>
+    <section class="cv-section">
+      <h2>Experience</h2>
+      <div class="timeline">
+        {site.experience.map((entry) => (
+          <article class="timeline-entry">
+            <span class="mono">{entry.period}</span>
+            <div>
+              <h3>{entry.role}</h3>
+              <p class="organization">{entry.organization}</p>
+              <p>{entry.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+    <section class="cv-section">
+      <h2>Research</h2>
+      <p>
+        <strong>Undergraduate thesis:</strong> {thesis.title}. Adapted ARGOS for moral reasoning on
+        ExplainEthics and examined search-space growth and instability in LLM-generated premises.
+      </p>
+      <p style="margin-top:16px">
+        <strong>Research manuscript:</strong> {hypernetworks.title}. Compared positional, Fourier,
+        and hash encodings for hypernetworks.
+      </p>
+      <a class="text-link primary" href={url('research/')} style="margin-top:18px">
+        Research details <Icon name="arrow" size={15} />
+      </a>
+    </section>
+    <section class="cv-section">
+      <h2>Selected public projects</h2>
+      {projects
+        .filter((p) => p.github)
+        .map((p) => (
+          <article style="margin-bottom:24px">
+            <h3 style="font-size:17px">
+              <a href={p.github}>
+                {p.title} <Icon name="external" size={14} />
+              </a>
+            </h3>
+            <p style="margin-top:8px;font-size:14px">{p.description}</p>
+          </article>
+        ))}
+    </section>
+    <section class="cv-section">
+      <h2>Technical foundations</h2>
+      <div class="skills-grid">
+        <div>
+          <h3>Machine learning & data</h3>
+          <p>
+            Python, PyTorch, scikit-learn, NumPy, pandas, embeddings, computer vision, retrieval
+            evaluation.
+          </p>
+        </div>
+        <div>
+          <h3>Software & systems</h3>
+          <p>
+            FastAPI, Flask, TypeScript, SQL, PostgreSQL, SQLite, Elasticsearch, Qdrant, Docker, Git,
+            Linux.
+          </p>
+        </div>
+        <div>
+          <h3>Video & inference</h3>
+          <p>
+            CUDA, OpenVINO, FFmpeg, MediaMTX, WebRTC, inference profiling, durable event delivery.
+          </p>
+        </div>
+        <div>
+          <h3>Mathematics & reasoning</h3>
+          <p>
+            Probability and statistics, propositional logic, symbolic constraints, Fourier features,
+            vector similarity, ranking metrics.
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="cv-section">
+      <h2>Professional profiles</h2>
+      <p>
+        <a class="text-link" href={site.github}>
+          GitHub <Icon name="external" size={14} />
+        </a>
+        <span aria-hidden="true"> · </span>
+        <a class="text-link" href={site.linkedin}>
+          LinkedIn <Icon name="external" size={14} />
+        </a>
+      </p>
+    </section>
+  </div>
+  <script>
+    document.getElementById('print-cv')?.addEventListener('click', () => window.print());
+  </script>
+</Base>

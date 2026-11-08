@@ -1,0 +1,73 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Configure Pages paths
+        shell: bash
+        env:
+          REPOSITORY: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          CUSTOM_SITE: ${{ vars.SITE_URL }}
+          CUSTOM_BASE: ${{ vars.BASE_PATH }}
+        run: |
+          repo="${REPOSITORY#*/}"
+          owner="${OWNER,,}"
+          site="https://${owner}.github.io"
+          base="/"
+          if [[ "${repo,,}" != "${owner}.github.io" ]]; then
+            base="/${repo}/"
+          fi
+          if [[ -n "$CUSTOM_SITE" ]]; then site="$CUSTOM_SITE"; fi
+          if [[ -n "$CUSTOM_BASE" ]]; then base="$CUSTOM_BASE"; fi
+          echo "SITE_URL=$site" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$base" >> "$GITHUB_ENV"
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check
+        run: npm run check
+      - name: Build static site
+        run: npm run build
+      - name: Verify generated output
+        run: npm run verify
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,205 @@
+---
+import '../styles/fonts.css';
+import 'katex/dist/katex.min.css';
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { url, absolute } from '../lib/urls';
+interface Props {
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article';
+  date?: Date;
+  updated?: Date;
+  noindex?: boolean;
+  canonicalPath?: string;
+}
+const {
+  title,
+  description = site.description,
+  type = 'website',
+  date,
+  updated,
+  noindex = false,
+  canonicalPath,
+} = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : site.title;
+const canonical = new URL(canonicalPath || Astro.url.pathname, Astro.site).href;
+const navigation = [
+  ['Home', ''],
+  ['About', 'about/'],
+  ['Research', 'research/'],
+  ['Projects', 'projects/'],
+  ['Writing', 'writing/'],
+  ['CV', 'cv/'],
+];
+const pathname = Astro.url.pathname;
+const active = (path: string) => (path ? pathname.startsWith(url(path)) : pathname === url(''));
+const structured =
+  type === 'article'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: title,
+        description,
+        url: canonical,
+        datePublished: date?.toISOString(),
+        dateModified: (updated || date)?.toISOString(),
+        author: { '@type': 'Person', name: site.name, url: absolute('about/') },
+        image: absolute('social-card.png'),
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: site.name,
+        url: absolute(),
+        jobTitle: site.role,
+        sameAs: [site.github, site.linkedin],
+      };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={url('sitemap-index.xml')} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} — Writing`}
+      href={url('rss.xml')}
+    />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={absolute('social-card.png')} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Fikri Budianto — AI Engineer. Retrieval, learning, representation, and reasoning."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absolute('social-card.png')} />
+    {date && <meta property="article:published_time" content={date.toISOString()} />}
+    {updated && <meta property="article:modified_time" content={updated.toISOString()} />}
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structured).replace(/</g, '\\u003c')}
+    />
+    <script is:inline>
+      (() => {
+        let saved;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch {}
+        document.documentElement.dataset.theme =
+          saved === 'dark' || saved === 'light'
+            ? saved
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <header class="site-header wrap">
+      <a class="wordmark" href={url()} aria-label="Fikri Budianto, home">
+        {site.name}
+      </a>
+      <nav aria-label="Main navigation">
+        {navigation.map(([label, path]) => (
+          <a
+            href={url(path)}
+            class:list={{ active: active(path) }}
+            aria-current={active(path) ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
+      <button
+        class="theme-toggle icon-button"
+        type="button"
+        aria-label="Switch color theme"
+        title="Switch color theme"
+      >
+        <span class="sun">
+          <Icon name="sun" />
+        </span>
+        <span class="moon">
+          <Icon name="moon" />
+        </span>
+      </button>
+    </header>
+    <main id="main" class="wrap" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer wrap">
+      <div>
+        <a class="footer-name" href={url()}>
+          {site.name}
+        </a>
+      </div>
+      <div class="footer-right">
+        <div class="footer-links">
+          <a href={site.github}>
+            GitHub <Icon name="external" size={13} />
+          </a>
+          <a href={site.linkedin}>
+            LinkedIn <Icon name="external" size={13} />
+          </a>
+          <a href={url('rss.xml')}>
+            RSS <Icon name="rss" size={13} />
+          </a>
+        </div>
+        <span class="mono copyright">
+          © {new Date().getFullYear()} {site.name}
+        </span>
+      </div>
+    </footer>
+    <script>
+      const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+      const sync = () =>
+        button?.setAttribute(
+          'aria-label',
+          `Switch to ${document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'} mode`,
+        );
+      sync();
+      button?.addEventListener('click', () => {
+        const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        try {
+          localStorage.setItem('theme', theme);
+        } catch {}
+        sync();
+      });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+        let saved;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch {}
+        if (!saved) {
+          document.documentElement.dataset.theme = event.matches ? 'dark' : 'light';
+          sync();
+        }
+      });
+    </script>
+  </body>
+</html>

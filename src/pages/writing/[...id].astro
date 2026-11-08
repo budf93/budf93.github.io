@@ -1,0 +1,73 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { getPosts } from '../../lib/posts';
+import { url, formatDate, readingTime } from '../../lib/urls';
+import { site } from '../../data/site';
+export async function getStaticPaths() {
+  return (await getPosts()).map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = toc.length >= 3;
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.description}
+  type="article"
+  date={post.data.date}
+  updated={post.data.updated}
+>
+  <header class="page-heading article-heading">
+    <p class="eyebrow">{post.data.tags.join(' / ')}</p>
+    <h1>{post.data.title}</h1>
+    <p class="lead">{post.data.description}</p>
+    <div class="article-meta mono">
+      <span>{site.name}</span>
+      <span class="separator">/</span>
+      <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      <span class="separator">/</span>
+      <span>{readingTime(post.body)} min read</span>
+      {post.data.updated && (
+        <>
+          <span class="separator">/</span>
+          <span>
+            Updated{' '}
+            <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time>
+          </span>
+        </>
+      )}
+    </div>
+  </header>
+  <div class="article-layout">
+    <article class="prose">
+      <Content />
+      <footer class="article-end">
+        <a class="text-link" href={url('writing/')}>
+          <span aria-hidden="true">←</span> All articles
+        </a>
+        <a class="text-link" href={site.github}>
+          GitHub profile <Icon name="external" size={14} />
+        </a>
+      </footer>
+    </article>
+    {showToc && (
+      <nav class="article-toc" aria-label="Table of contents">
+        <h2>On this page</h2>
+        <ol>
+          {toc.map((heading) => (
+            <li class={`depth-${heading.depth}`}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+  </div>
+</Base>

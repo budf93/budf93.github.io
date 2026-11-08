@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+import { url, formatDate, readingTime } from '../lib/urls';
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+const { posts } = Astro.props;
+---
+
+<div class="post-list">
+  {posts.map((post) => (
+    <article
+      class="post-row"
+      data-post
+      data-title={`${post.data.title} ${post.data.description}`.toLowerCase()}
+      data-tags={JSON.stringify(post.data.tags)}
+    >
+      <div class="post-date mono">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      </div>
+      <div class="post-summary">
+        <div class="post-tags mono">{post.data.tags.slice(0, 2).join(' / ')}</div>
+        <h3>
+          <a href={url(`writing/${post.id}/`)}>
+            {post.data.title}
+            <Icon name="arrow" />
+          </a>
+        </h3>
+        <p>{post.data.description}</p>
+      </div>
+      <span class="reading-time mono">{readingTime(post.body)} min read</span>
+    </article>
+  ))}
+</div>

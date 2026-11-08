@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { url } from '../lib/urls';
+---
+
+<Base title="Page not found" noindex canonicalPath={url('404.html')}>
+  <section class="not-found">
+    <p class="entry-meta">Error 404</p>
+    <h1>Page not found</h1>
+    <p>
+      The requested page could not be found. Use the navigation links to access another section.
+    </p>
+    <div class="introduction-links">
+      <a class="text-link primary" href={url()}>
+        Home <Icon name="arrow" />
+      </a>
+      <a class="text-link" href={url('writing/')}>
+        Writing <Icon name="arrow" />
+      </a>
+    </div>
+  </section>
+</Base>

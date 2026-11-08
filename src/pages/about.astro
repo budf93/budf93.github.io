@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Portrait from '../components/Portrait.astro';
+import { site } from '../data/site';
+import { url } from '../lib/urls';
+---
+
+<Base
+  title="About"
+  description="The engineering and research interests behind Fikri Budianto’s work: reliable AI systems, retrieval, representation, and neuro-symbolic reasoning."
+>
+  <header class="page-heading">
+    <h1>About</h1>
+    <p class="lead">
+      I am Fikri Budianto, an AI engineer with a background in Information Systems from Universitas
+      Indonesia. My work combines applied AI development, software engineering, and research.
+    </p>
+  </header>
+  <div class="two-column">
+    <div class="about-copy prose">
+      <p>
+        My interests include machine learning, information retrieval, and software engineering. I am
+        interested in both model development and the software infrastructure required to deploy and
+        evaluate AI applications.
+      </p>
+      <p>
+        I currently work as an AI Solutions Engineer at Omni Solutions Indonesia. Previously, at
+        Salam Pacific Indonesia Lines, I built model-serving APIs, a documentation chatbot, and a
+        vehicle-management application.
+      </p>
+      <h2>Education and research experience</h2>
+      <p>
+        I studied Information Systems at the Faculty of Computer Science, Universitas Indonesia.
+        Alongside software engineering, coursework in machine learning, deep learning, information
+        retrieval, and knowledge representation informed my academic interests in learning,
+        representation, and reasoning.
+      </p>
+      <p>
+        During a research internship at the IR–NLP Laboratory, I compared encoding strategies for
+        hypernetworks. That work involved reading papers, setting up controlled experiments, and
+        examining tradeoffs between reconstruction loss and validation accuracy.
+      </p>
+      <p>
+        I currently support Statistics and Probability as a teaching assistant. My previous teaching
+        responsibilities included coordinating Calculus 1 tutorials and grading.
+      </p>
+      <h2>Undergraduate thesis</h2>
+      <p>
+        My undergraduate thesis investigated neuro-symbolic abductive inference for moral reasoning.
+        I adapted ARGOS to the ExplainEthics dataset, pairing language-model-generated commonsense
+        premises with propositional constraints and a SAT solver.
+      </p>
+      <p>
+        The study evaluated query accuracy and analyzed limitations in the reasoning process,
+        including search-space growth, difficulty generating relevant premises, and variability in
+        generated clauses. These findings highlight the importance of examining the assumptions
+        underlying formally checked inference.
+      </p>
+      <p>
+        My current interests connect the evaluation of practical AI systems with questions about
+        knowledge representation and reasoning. I am particularly interested in methods that make a
+        system’s assumptions and inference processes more explicit.
+      </p>
+      <a class="text-link primary" href={url('research/')}>
+        Research overview <Icon name="arrow" />
+      </a>
+    </div>
+    <aside class="sidebar">
+      <div class="sidebar-section sidebar-portrait">
+        <Portrait />
+      </div>
+      <div class="sidebar-section">
+        <h2>Education</h2>
+        <p>
+          <strong>{site.education.degree}</strong>
+          <br />
+          {site.education.institution}
+          <br />
+          {site.education.faculty}
+          <br />
+          <span class="mono">{site.education.period}</span>
+        </p>
+      </div>
+      <div class="sidebar-section">
+        <h2>Interests</h2>
+        <ul>
+          {site.interests.map((interest) => (
+            <li>{interest}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="sidebar-section">
+        <h2>Professional profiles</h2>
+        <p>
+          <a class="text-link" href={site.github}>
+            GitHub <Icon name="external" size={14} />
+          </a>
+          <br />
+          <a class="text-link" href={site.linkedin}>
+            LinkedIn <Icon name="external" size={14} />
+          </a>
+          <br />
+          <a class="text-link" href={url('cv/')}>
+            Curriculum vitae <Icon name="arrow" size={14} />
+          </a>
+        </p>
+      </div>
+    </aside>
+  </div>
+  <section class="section" id="experience">
+    <div class="section-heading">
+      <div class="section-title">
+        <h2>Professional and teaching experience</h2>
+      </div>
+    </div>
+    <div class="timeline">
+      {site.experience.map((entry) => (
+        <article class="timeline-entry">
+          <span class="mono">{entry.period}</span>
+          <div>
+            <h3>{entry.role}</h3>
+            <p class="organization">{entry.organization}</p>
+            <p>{entry.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>
